@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+/* Pop Up Styles*/
+.popup-title {
+  font-family: 'Product Sans', sans-serif;
+  color: white;
+  background: rgba(139, 17, 17, 0.9);
+  padding: 10px;
+}
+
+.popup-settings {
+  /* margin-left: 10px; */
+  font-family: 'Product Sans', sans-serif;
+  margin-top: 10px;
+  margin-bottom: 14px;
+}
+
+.popup-label {
+  font-size: 17px;
+  cursor: pointer;
+  color: #000000;
+}
+
+#seizafeStatus {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+}
+
+.vidButton{
+  background-color: rgba(139, 17, 17, 0.9);
+  font-size: 15px;
+  margin: 0 auto;
+  display: block;
+  width: 150px;
+  height: 25px;
+  border-color: transparent;
+  border-radius: 5px;
+  color: white;
+  font-family: "Poppins";
+  font-weight: 400;
+  transition: box-shadow 0.3s;
+}
+
+.vidButton:hover {
+  background-color: rgba(173, 28, 28, 0.993);
+  opacity: 0.9;
+  cursor: pointer;
+  /* box-shadow: 0 11px 11px rgba(33, 33, 33, 0.2); */
+}
+
+/* Checkbox */
+@supports (-webkit-appearance: none) or (-moz-appearance: none) {
+input[type='checkbox'],
+input[type='radio'] {
+--active: rgba(139, 17, 17, 0.9);
+--active-inner: white;
+--focus: 2px white;
+--border: rgba(139, 17, 17, 0.9);
+--background: #fff;
+-webkit-appearance: none;
+-moz-appearance: none;
+height: 21px;
+vertical-align: top;
+position: relative;
+cursor: pointer;
+border: 1px solid var(--bc, var(--border));
+background: var(--b, var(--background));
+}
+input[type='checkbox']:after,
+input[type='radio']:after {
+content: '';
+position: absolute;
+}
+input[type='checkbox']:checked,
+input[type='radio']:checked {
+--b: var(--active);
+--bc: var(--active);
+}
+
+.seizafe-label {
+font-size: 18px;
+color: #ffffff;
+}
+
+  input[type='checkbox'].switch {
+    width: 38px;
+    border-radius: 11px;
+  }
+  input[type='checkbox'].switch:after {
+    left: 2px;
+    top: 2px;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    background: var(--ab, var(--border));
+    transform: translateX(var(--x, 0));
+  }
+  input[type='checkbox'].switch:checked {
+    --ab: var(--active-inner);
+    --x: 17px;
+  }
+
+  input[type='radio'] {
+    border-radius: 50%;
+  }
+}
+
+/*Radio Button Group*/
+input[type='radio'] {
+  display: none;
+}
+
