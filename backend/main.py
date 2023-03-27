@@ -26,9 +26,9 @@ def check():
         filename = str(random.randint(1000, 9999))
         video = YouTube(data["url"])
         video.streams.filter(file_extension="mp4").first() \
-            .download(output_path="Backend\\videos", filename=filename)
+            .download(output_path="Videos", filename=filename)
 
-        pairs = analyze.analyze("Backend\\videos\\" + filename)
+        pairs = analyze.analyze("Videos/" + filename)
 
         # reporting.add_timestamps(data["url"], pairs)
 

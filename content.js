@@ -8,83 +8,13 @@ var flickerStartedAtTime = 0;
 var lastBrightFrame = [0, 0, 0, 0, 0, 0];
 let video = document.querySelector('.video-stream.html5-main-video');
 var counter = 0;
-var coutner2 = 0;
 let lower = document.querySelector('.ytp-chrome-bottom');
-var skip_frames = true;
-var overlay_active = false;
-var display_warning = false;
+
 var hidden, visibilityChange;
 if (typeof document.hidden !== 'undefined') {
   hidden = 'hidden';
   visibilityChange = 'visibilitychange';
 }
-
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-
-  let data = { url: window.location.toString() };
-  if (request.message) {
-    data = { url: request.message };
-    chrome.tabs.create({ url: request.message });
-  }
-
-fetch("http://127.0.0.1:5000/check", {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  }).then((res) => {
-    res.json().then((json) => {
-      console.log(json);
-      intervals = json.intervals;
-      alert("Video is ready to play");
-    });
-  });
-});
-
-let intervals = [];
-let goto = 0;
-
-
-
-setInterval(function (request) {
-  console.log(intervals);
-  var video = document.getElementsByTagName("video")[0];
-  if (video) {
-    let time = video.currentTime;
-    for (let i = 0; i < intervals.length; i++) {
-      if(time>=intervals[0][0]-1&&time<=intervals[0][1]&&!display_warning){
-        console.log('warning');
-        video.pause();
-        refreshSeizafeProcessing();
-        seizafeOn();
-        drawSeizafeCanvas();
-        DisplaySeizafeWarning();
-      }
-      if ((time >= intervals[i][0]-1 && time < intervals[i][1] ) || time===intervals[i][1]) {
-        console.log("kuch");
-        if(skip_frames){
-
-        goto = intervals[i][1];
-
-        //continueScript();
-        video.currentTime = goto;
-        } else {
-          if(!overlay_active){
-            overlay();
-            overlay_active=true;
-          }
-        }
-        console.log("here");
-        break;
-      }else if(time===intervals[i][1]&&(!skip_frames)&&overlay_active){
-        overlayoff();
-      }
-    }
-  }
-}, 1000);
-
 
 function cloudwalkerModeOn() {
   cloudwalkerMode = 1;
@@ -131,13 +61,8 @@ function hideSeizafe() {
   }
 }
 
-
 function DisplaySeizafeWarning() {
   if (warnagain == 1) {
-    var seizafecanvas = document.getElementById('seizafe-canvas');
-    if (seizafecanvas) {
-      seizafecanvas.style.display = 'block';
-    }
     document.querySelector('.video-stream.html5-main-video').pause();
     var seizafewarning = document.getElementById('seizafewarning');
     if (seizafewarning) {
@@ -161,13 +86,18 @@ function DisplaySeizafeWarning() {
               <br></br>
               <span class='overlay-text-body'>
               Hit spacebar to continue watching.
-              </span><br>              
+              </span><br>
+              <div class="seizafe-toggle2" id="seizafe-toggle2"><input id="s2" type="checkbox" class="switch">
+              <label for="s2" class='seizafe-label'>Watch the video with an overlay.</label><br></div>
+              <div class="seizafe-toggle" id="seizafe-toggle"><input id="s1" type="checkbox" class="switch">
+              <label for="s1" class='seizafe-label'>Don't warn me again during this video.</label><br></div>
+
               </p>
             </div>
           </div>
         </div>`
       );
-        animate = true;
+
     document
       .getElementById('seizafewarning')
       .addEventListener('click', hideSeizafe);
@@ -179,7 +109,6 @@ function DisplaySeizafeWarning() {
         if (document.getElementById('s1').checked == true) {
           warnagain = 0;
           window.setTimeout(hideSeizafe, 800);
-          skip_frames=true;
         } else if (document.getElementById('s1').checked == false) {
           warnagain = 1;
           window.setTimeout(hideSeizafe, 800);
@@ -196,9 +125,9 @@ function DisplaySeizafeWarning() {
         } else{
         }
       });
-      
+    
+
   }
-  display_warning = true;
 }
 
 function overlay(){
@@ -210,20 +139,8 @@ function overlay(){
       );
       document.querySelector('.video-stream.html5-main-video').play();
       counter = 1;
-      overlay_active=true;
-      skip_frames=false;
-      document.body.onkeyup = function(e) {
-        if (e.key == ";" ||
-            e.code == ";") {
-              overlayoff();     
-        }
-      }
+      
   }
-}
-
-function overlayoff(){
-  removeElementsByClass('overlay2');
-  // overlay_active=false;
 }
 
 function drawSeizafeCanvas() {
@@ -231,11 +148,13 @@ function drawSeizafeCanvas() {
     var playerContainer = document.querySelector(
       '#player-container.style-scope.ytd-watch-flexy'
     );
+
     if (playerContainer) {
       clearInterval(interval);
       playerContainer.insertAdjacentHTML(
         'beforeend',
         `<canvas id="seizafe-canvas"  class="szf-processing"></canvas>`
+        
       );
     } else {
     }
@@ -245,21 +164,56 @@ function drawSeizafeCanvas() {
 let c1, ctx1, c_tmp, ctx_tmp;
 var seizafecanvas = document.getElementById('seizafe-canvas');
 
+let intervals = [];
+let goto = 0;
+var data1 = { url: window.location.toString() };
+
+fetch("http://127.0.0.1:5000/check", {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data1),
+  }).then((res) => {
+    res.json().then((json) => {
+      console.log(json);
+      intervals = json.intervals;
+    });
+  });
+
+setInterval(function (request) {
+  console.log(intervals);
+  video = document.getElementsByTagName("video")[0];
+  if (video) {
+    let time = video.currentTime;
+    for (let i = 0; i < intervals.length; i++) {
+      if (time >= intervals[i][0] && time < intervals[i][1]) {
+        goto = intervals[i][1];
+        intervals.shift();
+
+        //continueScript();
+        video.currentTime = goto;
+        console.log("here");
+        break;
+      }
+    }
+  }
+}, 1000);
+
+
+
+
 function init() {
+
+
   
   c1 = document.getElementById('seizafe-canvas');
   ctx1 = c1.getContext('2d');
   c_tmp = document.createElement('canvas');
   ctx_tmp = c_tmp.getContext('2d');
 
-  // computeFrame();
-
-  document.body.onkeyup = function(e) {
-    if (e.key == ";" ||
-        e.code == ";") {
-          overlayoff();     
-    }
-  }
+  computeFrame();
 
   document.body.onkeyup = function (e) {
     if (e.keyCode == 37 || e.keyCode == 39) {
@@ -270,12 +224,24 @@ function init() {
             keepComputing = 1;
             previousSignificant = 0;
             previousSignificantTmp = 0;
-            // computeFrame();
+            computeFrame();
           }
         }, 1000);
       }
     }
-  };  
+  };
+
+  document.body.onkeyup = function(e) {
+    if (e.key == " " ||
+        e.code == "Space") {
+      if (counter == 1){
+      removeElementsByClass('overlay2');
+      counter == 0;
+      }
+    } else if (counter == 0) {
+      overlay();
+    }
+  }
 
   var elements = document.getElementsByClassName('ytp-settings-menu');
 
@@ -293,6 +259,183 @@ function flickerDetected() {
   DisplaySeizafeWarning();
 }
 
+function computeFrame() {
+  if (!video.paused) {
+    if (video.videoWidth > 0) {
+      ctx_tmp.drawImage(
+        video,
+        0,
+        0,
+        video.videoWidth / 8,
+        video.videoHeight / 8
+      );
+      let frame = ctx_tmp.getImageData(
+        0,
+        0,
+        video.videoWidth,
+        video.videoHeight
+      );
+      ctx1.putImageData(frame, 0, 0);
+
+      var timeStamp = Math.floor(video.currentTime);
+      var colorSum = 0;
+      var rSum = 0;
+      var gSum = 0;
+      var bSum = 0;
+      var hueSum = 0;
+      var r, g, b, avg;
+
+      function checkTimeout() {
+        var absoluteDifference = Math.abs(timeStamp - warnedAtTime);
+        if (warnedAtTime == 0 || absoluteDifference >= waitSeconds) {
+          flickerDetected();
+        }
+      }
+
+      for (var i = 0; i < frame.data.length; i += 4) {
+        r = frame.data[i];
+        g = frame.data[i + 1];
+        b = frame.data[i + 2];
+
+        avg = Math.floor((r + g + b) / 3);
+        colorSum += avg;
+        hueSum += r + g + b;
+        rSum += r;
+        gSum += g;
+        bSum += b;
+      }
+
+      var seizafeBrightnessValue = Math.floor(
+        colorSum / ((video.videoWidth / 10) * (video.videoHeight / 10))
+      );
+
+      rPercent = Math.floor((rSum / hueSum) * 100);
+      gPercent = Math.floor((gSum / hueSum) * 100);
+      bPercent = Math.floor((bSum / hueSum) * 100);
+
+      function checkColorTimeout() {
+        if (lastBrightFrame[0] + lastBrightFrame[1] + lastBrightFrame[2] == 0) {
+          lastBrightFrame[0] = rPercent;
+          lastBrightFrame[1] = gPercent;
+          lastBrightFrame[2] = bPercent;
+          lastBrightFrame[3] = timeStamp;
+          lastBrightFrame[4]++;
+        } else {
+          var greatestColor = Math.max.apply(Math, [
+            lastBrightFrame[0],
+            lastBrightFrame[1],
+            lastBrightFrame[2],
+          ]);
+          var greatestNewColor = Math.max.apply(Math, [
+            rPercent,
+            gPercent,
+            bPercent,
+          ]);
+
+          function checkNewColor() {
+            if (lastBrightFrame[0] == greatestColor) {
+              if (rPercent != lastBrightFrame[0]) {
+                if (Math.abs(rPercent - lastBrightFrame[0]) >= 5) {
+                  lastBrightFrame[5] = 1;
+                }
+              } else {
+                lastBrightFrame[5] = 0;
+              }
+            } else if (lastBrightFrame[1] == greatestColor) {
+              if (gPercent != lastBrightFrame[1]) {
+                if (Math.abs(gPercent - lastBrightFrame[1]) >= 5) {
+                  lastBrightFrame[5] = 1;
+                }
+              } else {
+                lastBrightFrame[5] = 0;
+              }
+            } else if (lastBrightFrame[2] == greatestColor) {
+              if (bPercent != lastBrightFrame[2]) {
+                if (Math.abs(bPercent - lastBrightFrame[2]) >= 5) {
+                  lastBrightFrame[5] = 1;
+                }
+              } else {
+                lastBrightFrame[5] = 0;
+              }
+            }
+
+            if (timeStamp - lastBrightFrame[3] >= flickerTimer) {
+              lastBrightFrame[3] = 0;
+              lastBrightFrame[4] = 0;
+            }
+
+            if (lastBrightFrame[5] == 1) {
+              if (lastBrightFrame[4] == flickers) {
+                lastBrightFrame[4] = 0;
+                lastBrightFrame[3] = 0;
+                var absoluteDifference = Math.abs(timeStamp - warnedAtTime);
+                if (warnedAtTime == 0 || absoluteDifference >= waitSeconds) {
+                  flickerDetected();
+                }
+              } else {
+                lastBrightFrame[3] = timeStamp;
+                lastBrightFrame[4]++;
+              }
+            }
+            lastBrightFrame[0] = rPercent;
+            lastBrightFrame[1] = gPercent;
+            lastBrightFrame[2] = bPercent;
+          }
+
+          if (rPercent == greatestNewColor) {
+            checkNewColor();
+          } else if (gPercent == greatestNewColor) {
+            checkNewColor();
+          } else if (bPercent == greatestNewColor) {
+            checkNewColor();
+          }
+        }
+      }
+
+      if (previousSignificantTmp < seizafeBrightnessValue) {
+        previousSignificant = '⬆';
+      }
+      if (previousSignificantTmp > seizafeBrightnessValue) {
+        previousSignificant = '⬇';
+      }
+      if (
+        previousSignificantTmp + brightnessSensitivityUpper <
+          seizafeBrightnessValue &&
+        previousSignificantTmp > 0 &&
+        bPercent > desiredBluePercent
+      ) {
+        previousSignificant = '⬆⬆';
+        checkTimeout();
+      }
+      if (
+        previousSignificantTmp - brightnessSensitivityLower >
+          seizafeBrightnessValue &&
+        seizafeBrightnessValue > 0
+      ) {
+        previousSignificant = '⬇⬇';
+        checkTimeout();
+      }
+      if (previousSignificantTmp == seizafeBrightnessValue) {
+        previousSignificant = '🔄';
+      }
+      if (rPercent > gPercent + bPercent - 10) {
+        checkColorTimeout();
+      }
+      if (gPercent > rPercent + bPercent - 10) {
+        checkColorTimeout();
+      }
+      if (bPercent > gPercent + rPercent - 10) {
+        checkColorTimeout();
+      }
+
+      previousSignificantTmp = seizafeBrightnessValue;
+
+      if (keepComputing == 1) {
+        setTimeout(computeFrame, 0);
+      }
+    }
+  }
+}
 
 function seizafeProcessing() {
   var intervalProcessing = setInterval(function () {
@@ -362,7 +505,7 @@ function seizafePlay() {
   if (!video.paused) {
     hideSeizafe();
     keepComputing = 1;
-    // computeFrame();
+    computeFrame();
   }
 }
 
@@ -415,10 +558,3 @@ chrome.runtime.onMessage.addListener(function (request) {
     handleVisibilityChange();
   }
 });
-
-  document.body.onkeyup = function(e) {
-    if (e.key == "o" ||
-        e.code == "o") {
-      overlayoff();
-      }
-    }
