@@ -28,7 +28,7 @@ def check():
         video.streams.filter(file_extension="mp4").first() \
             .download(output_path="Videos", filename=filename)
 
-        pairs = analyze.analyze("Videos/" + filename)
+        pairs = analyze.analyze("Videos\" + filename)
 
         # reporting.add_timestamps(data["url"], pairs)
 
